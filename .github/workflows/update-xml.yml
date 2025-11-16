@@ -1,0 +1,34 @@
+name: Update Version XML
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-xml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Update version.xml
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          VERSION="${VERSION#v}" 
+          
+          cat > version.xml << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <item>
+            <version>$VERSION</version>
+            <url>https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/equipment-tracker-windows-server.zip</url>
+            <changelog>https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}</changelog>
+            <mandatory>false</mandatory>
+          </item>
+          EOF
+          
+      - name: Commit and push XML
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add version.xml
+          git commit -m "Update version.xml to ${{ github.ref_name }}"
+          git push
