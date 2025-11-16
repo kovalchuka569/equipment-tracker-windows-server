@@ -9,16 +9,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Update version.xml
         run: |
+          # Извлекаем версию из тега
           VERSION="${GITHUB_REF#refs/tags/}"
           VERSION="${VERSION#v}" 
           
           cat > version.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <item>
-            <version>$VERSION</version>
+            <version>$VERSION.0</version>
             <url>https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/equipment-tracker-windows-server.zip</url>
             <changelog>https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}</changelog>
             <mandatory>false</mandatory>
@@ -30,5 +33,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add version.xml
-          git commit -m "Update version.xml to ${{ github.ref_name }}"
+          git commit -m "Auto: Update version.xml to ${{ github.ref_name }}"
           git push
